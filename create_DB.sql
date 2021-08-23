@@ -1,8 +1,7 @@
-create database university;
-
 create table groups_(
 group_id int primary key generated always as identity,
 group_name char(1),
+unique(group_name)  
 );
 
 create table journal (
@@ -39,6 +38,8 @@ foreign key (teacher_id)
 references teachers(teacher_id)
 );
 
+alter table classes add UNIQUE (class_name, teacher_id); 
+
 create Table Schedule(
 ID int primary key generated always as identity,
 Class_ID int,
@@ -47,6 +48,8 @@ constraint fk_schedule
 foreign key (student_id) 
 references students(student_id)
 );
+
+alter table schedule add UNIQUE (class_id, student_id);  
 
 insert into classes(class_name) 
 values 
@@ -107,8 +110,6 @@ insert into students(first_name, second_name, group_id) values
  ;
 
 
-
-
 insert into schedule(class_id, student_id)  
 select c.class_id, s.student_id from students s, classes c where s.group_id in  
 (select group_id from groups_ where group_name in ('A','C')) and c.class_name = 'linear algebra'; 
@@ -124,3 +125,35 @@ select c.class_id, s.student_id from students s, classes c where s.group_id in
 insert into schedule(class_id, student_id)  
 select c.class_id, s.student_id from students s, classes c where s.group_id in  
 (select group_id from groups_ where group_name in ('B', 'C')) and c.class_name = 'big data analyzes'; 
+
+/*PLEASE SAVE AND RUN THIS PYTHON SCRIPT TO FILL IN THE JOURNAL TABLE WITH RANDOM DATA
+ * NOTE THAT YOU SHOULD CHANGE [dbname], [user], [password] WITH ACTUAL VALUES FOR YOUR DB
+ * 
+import psycopg2
+import datetime
+from datetime import timedelta
+from faker import Faker
+import random
+
+def random_date(start_date, end_date):
+    fake = Faker()
+    return fake.date_between(start_date, end_date)
+    
+def set_journal_data():
+    with psycopg2.connect("dbname=postgres user=postgres password = '1234'") as conn:
+        cur = conn.cursor()
+        get_list_sql = '''select s.student_id, sdl.class_id  from students as s inner join schedule as sdl on sdl.student_id = s.student_id;'''   
+        insert_sql = """insert into journal (student_id, class_id, grade, date_) values (%s,%s,%s,%s)"""
+        cur.execute(get_list_sql)
+        res = cur.fetchall()
+        start_date = datetime.date(year=2020, month=1, day=1)
+        for r in res:
+            for i in range(7):
+                task= (*(r), random.randrange(7, 12, 1), str(start_date+timedelta(days = random.randrange(2, 363, 1))))
+                cur.execute(insert_sql, task)
+        conn.commit()
+        cur.close()
+
+if __name__ == '__main__':
+    set_journal_data()
+ */
