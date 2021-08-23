@@ -48,23 +48,23 @@ order by group_, _class_;
  Query 4: average grade for all groups 
  */
 
-select avg(j.grade) from journal as j;
+select avg(j.grade) as average_grade from journal as j;
 
 /* 
  Query 5: What classes are reading by each teacher
  */
 
-select t.first_name||' '||t.second_name as teacher, c.class_name as class_
+select t.first_name||' '||t.second_name as teacher, c.class_name as class_name
 from teachers as t
 inner join classes as c 
 on t.teacher_id = c.teacher_id
-order by teacher, class_;
+order by teacher, class_name;
 
 /* 
  Query 6: List of students for paticular group
  */
 
-select s.first_name||' '||s.second_name as student
+select s.first_name||' '||s.second_name as student, g.group_name as group
 from students as s
 inner join groups_ as g 
 on s.group_id = g.group_id 
@@ -75,7 +75,7 @@ where g.group_name = 'A';
  */
 
 
-select s.first_name||' '||s.second_name as student, j.date_ as date, j.grade
+select s.first_name||' '||s.second_name as student, g.group_name, j.date_ as date, j.grade
 from students as s
 inner join groups_ as g 
 on s.group_id = g.group_id 
@@ -88,10 +88,10 @@ order by student, date asc;
 
 /* 
  Query 8: List of grades for students from the particular group and particular 
- class on the last date
+ class on the last date in journal for this class&group
  */
 
-select s.first_name||' '||s.second_name as student, j.grade
+select s.first_name||' '||s.second_name as student, j.grade, j.date_ as date
 from students as s
 inner join groups_ as g 
 on s.group_id = g.group_id 
@@ -157,7 +157,7 @@ where (s.first_name = 'Aarush' and s.second_name= 'Shaw' ) and (t.first_name = '
 group by student, teacher;
 
 /* 
- Query 12: Average grade that teacher set up for student
+ Query 12: Average grade that teacher set up for all the students
   */
 
 select t.first_name||' '||t.second_name as teacher, avg(j.grade) as average_grade
