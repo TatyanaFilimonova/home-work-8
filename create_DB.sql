@@ -1,7 +1,7 @@
 create table groups_(
 group_id int primary key generated always as identity,
 group_name char(1),
-unique(group_name)  
+unique(group_name)
 );
 
 create table journal (
@@ -9,7 +9,8 @@ record_id int primary key generated always as identity,
 Student_ID int,
 Class_ID int,
 Grade int,
-date_ TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+date_ TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+unique(Student_ID, Class_ID, Grade, date_)
  );
 
 create table students (
@@ -35,21 +36,22 @@ Class_name varchar(30),
 Teacher_ID int,
 constraint fk_teacher
 foreign key (teacher_id)
-references teachers(teacher_id)
+references teachers(teacher_id),
+unique(class_name, teacher_id)
 );
 
-alter table classes add UNIQUE (class_name, teacher_id); 
 
 create Table Schedule(
 ID int primary key generated always as identity,
 Class_ID int,
 Student_ID int,
+unique (class_id, student_id),
 constraint fk_schedule 
 foreign key (student_id) 
 references students(student_id)
 );
 
-alter table schedule add UNIQUE (class_id, student_id);  
+ 
 
 insert into classes(class_name) 
 values 
@@ -126,13 +128,19 @@ insert into schedule(class_id, student_id)
 select c.class_id, s.student_id from students s, classes c where s.group_id in  
 (select group_id from groups_ where group_name in ('B', 'C')) and c.class_name = 'big data analyzes'; 
 
+
 /*PLEASE SAVE AND RUN THIS PYTHON SCRIPT TO FILL IN THE JOURNAL TABLE WITH RANDOM DATA
  * NOTE THAT YOU SHOULD CHANGE [dbname], [user], [password] WITH ACTUAL VALUES FOR YOUR DB
  * 
 import psycopg2
 import datetime
 from datetime import timedelta
+from faker import Faker
 import random
+
+def random_date(start_date, end_date):
+    fake = Faker()
+    return fake.date_between(start_date, end_date)
     
 def set_journal_data():
     with psycopg2.connect("dbname=postgres user=postgres password = '1234'") as conn:
@@ -152,3 +160,4 @@ def set_journal_data():
 if __name__ == '__main__':
     set_journal_data()
  */
+
