@@ -132,12 +132,7 @@ select c.class_id, s.student_id from students s, classes c where s.group_id in
 import psycopg2
 import datetime
 from datetime import timedelta
-from faker import Faker
 import random
-
-def random_date(start_date, end_date):
-    fake = Faker()
-    return fake.date_between(start_date, end_date)
     
 def set_journal_data():
     with psycopg2.connect("dbname=postgres user=postgres password = '1234'") as conn:
