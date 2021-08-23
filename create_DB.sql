@@ -21,6 +21,8 @@ group_id int,
 constraint fk_group 
 foreign key (group_id)
 references groups_(group_id)
+ON DELETE SET NULL
+ON UPDATE CASCADE
 );
 
 
@@ -34,10 +36,12 @@ create table classes(
 Class_ID int primary key generated always as identity,
 Class_name varchar(30),
 Teacher_ID int,
+unique(class_name, teacher_id),
 constraint fk_teacher
 foreign key (teacher_id)
-references teachers(teacher_id),
-unique(class_name, teacher_id)
+references teachers(teacher_id)
+ON DELETE SET NULL
+ON UPDATE CASCADE
 );
 
 
@@ -50,8 +54,6 @@ constraint fk_schedule
 foreign key (student_id) 
 references students(student_id)
 );
-
- 
 
 insert into classes(class_name) 
 values 
@@ -68,9 +70,11 @@ insert into teachers(first_name, second_name) values
 ;
 
 
-update  classes set teacher_id  = 3 where class_id = 6;
-update  classes set teacher_id  = 1 where class_id in (4,5);
-update  classes set teacher_id  = 2 where class_id in (7,8);
+update  classes set teacher_id  = 1 where class_name = 'linear algebra';
+update  classes set teacher_id  = 1 where class_name = 'statistic';
+update  classes set teacher_id  = 3 where class_name = 'data bases';
+update  classes set teacher_id  = 2 where class_name = 'big data analyzes';
+update  classes set teacher_id  = 2 where class_name = 'differential equations';
 
 
 insert into groups_(group_name) values
@@ -128,22 +132,16 @@ insert into schedule(class_id, student_id)
 select c.class_id, s.student_id from students s, classes c where s.group_id in  
 (select group_id from groups_ where group_name in ('B', 'C')) and c.class_name = 'big data analyzes'; 
 
-
-/*PLEASE SAVE AND RUN THIS PYTHON SCRIPT TO FILL IN THE JOURNAL TABLE WITH RANDOM DATA
- * NOTE THAT YOU SHOULD CHANGE [dbname], [user], [password] WITH ACTUAL VALUES FOR YOUR DB
- * 
+/*
 import psycopg2
 import datetime
 from datetime import timedelta
-from faker import Faker
 import random
 
-def random_date(start_date, end_date):
-    fake = Faker()
-    return fake.date_between(start_date, end_date)
     
 def set_journal_data():
-    with psycopg2.connect("dbname=postgres user=postgres password = '1234'") as conn:
+# please input your database credentials in the row below:
+	with psycopg2.connect("dbname=postgres user=postgres password = '1234'") as conn:
         cur = conn.cursor()
         get_list_sql = '''select s.student_id, sdl.class_id  from students as s inner join schedule as sdl on sdl.student_id = s.student_id;'''   
         insert_sql = """insert into journal (student_id, class_id, grade, date_) values (%s,%s,%s,%s)"""
@@ -153,11 +151,15 @@ def set_journal_data():
         for r in res:
             for i in range(7):
                 task= (*(r), random.randrange(7, 12, 1), str(start_date+timedelta(days = random.randrange(2, 363, 1))))
-                cur.execute(insert_sql, task)
-        conn.commit()
+                # some times there are error with unique constraint because random values is not really random....
+                # so after inserting every row we have to commit changes
+                try:
+                    cur.execute(insert_sql, task)
+                    conn.commit()
+                except:
+                    continue
         cur.close()
 
 if __name__ == '__main__':
     set_journal_data()
- */
-
+*/
